@@ -67,7 +67,7 @@ if args.state_dict_path is not None:
         print('failed loading state_dicts, pls check file path: ', end="")
         print(args.state_dict_path)
 
-if args.inference_only or True:
+if args.inference_only:
     model.eval()
     t_test = evaluate(model, dataset, args)
     print('test (NDCG@10: %.4f, HR@10: %.4f)' % (t_test[0], t_test[1]))

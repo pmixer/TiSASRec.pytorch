@@ -241,7 +241,7 @@ def evaluate(model, dataset, args):
         predictions = -model.predict(*[np.array(l) for l in [[u], [seq], [time_matrix],item_idx]])
         predictions = predictions[0]
 
-        rank = predictions.argsort().argsort()[0]
+        rank = predictions.argsort().argsort()[0].item()
 
         valid_user += 1
 
@@ -290,7 +290,7 @@ def evaluate_valid(model, dataset, args):
         predictions = -model.predict(*[np.array(l) for l in [[u], [seq], [time_matrix],item_idx]])
         predictions = predictions[0]
 
-        rank = predictions.argsort().argsort()[0]
+        rank = predictions.argsort().argsort()[0].item()
 
         valid_user += 1
 

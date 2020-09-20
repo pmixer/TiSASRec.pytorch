@@ -23,7 +23,7 @@ class PointWiseFeedForward(torch.nn.Module):
 
 class TimeAwareMultiHeadAttention(torch.nn.Module):
     # required homebrewed mha layer for Ti/SASRec experiments
-    def __init__(self, hidden_size, head_num, dropout_rate):
+    def __init__(self, hidden_size, head_num, dropout_rate, dev):
         super(TimeAwareMultiHeadAttention, self).__init__()
         self.Q_w = torch.nn.Linear(hidden_size, hidden_size)
         self.K_w = torch.nn.Linear(hidden_size, hidden_size)
@@ -36,6 +36,7 @@ class TimeAwareMultiHeadAttention(torch.nn.Module):
         self.head_num = head_num
         self.head_size = hidden_size // head_num
         self.dropout_rate = dropout_rate
+        self.dev = dev
 
     def forward(self, queries, keys, time_mask, attn_mask, time_matrix_K, time_matrix_V, abs_pos_K, abs_pos_V):
         Q, K, V = self.Q_w(queries), self.K_w(keys), self.V_w(keys)
@@ -63,7 +64,8 @@ class TimeAwareMultiHeadAttention(torch.nn.Module):
 
         time_mask = time_mask.unsqueeze(-1).expand(attn_weights.shape[0], -1, attn_weights.shape[-1])
         attn_mask = attn_mask.unsqueeze(0).expand(attn_weights.shape[0], -1, -1)
-        paddings = torch.ones(attn_weights.shape) *  FLOAT_MIN # float('-inf')
+        paddings = torch.ones(attn_weights.shape) *  -1e23 # float('-inf')
+        paddings = paddings.to(self.dev)
         attn_weights = torch.where(time_mask, paddings, attn_weights) # True:pick padding
         attn_weights = torch.where(attn_mask, paddings, attn_weights) # enforcing causality
 
@@ -119,7 +121,8 @@ class TiSASRec(torch.nn.Module): # similar to torch.nn.MultiheadAttention
 
             new_attn_layer = TimeAwareMultiHeadAttention(args.hidden_units,
                                                             args.num_heads,
-                                                            args.dropout_rate)
+                                                            args.dropout_rate,
+                                                            args.device)
             self.attention_layers.append(new_attn_layer)
 
             new_fwd_layernorm = torch.nn.LayerNorm(args.hidden_units, eps=1e-8)
