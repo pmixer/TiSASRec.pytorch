@@ -1,6 +1,6 @@
 modified based on [paper author's tensorflow implementation](https://github.com/JiachengLi1995/TiSASRec), switching to PyTorch(v1.6) for simplicity, executable by:
 
-```python main.py --dataset=ml-1m --train_dir=default```
+```python main.py --dataset=ml-1m --train_dir=default --device=cuda```
 
 pls check paper author's [repo](https://github.com/JiachengLi1995/TiSASRec) for detailed intro and more complete README, and here's paper bib FYI :)
 
