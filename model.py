@@ -64,19 +64,20 @@ class TimeAwareMultiHeadAttention(torch.nn.Module):
 
         time_mask = time_mask.unsqueeze(-1).expand(attn_weights.shape[0], -1, attn_weights.shape[-1])
         attn_mask = attn_mask.unsqueeze(0).expand(attn_weights.shape[0], -1, -1)
-        paddings = torch.ones(attn_weights.shape) *  -1e23 # float('-inf')
+        paddings = torch.ones(attn_weights.shape) *  (-2**32+1) # -1e23 # float('-inf')
         paddings = paddings.to(self.dev)
         attn_weights = torch.where(time_mask, paddings, attn_weights) # True:pick padding
         attn_weights = torch.where(attn_mask, paddings, attn_weights) # enforcing causality
 
         attn_weights = self.softmax(attn_weights) # code as below invalids pytorch backward rules
+        # attn_weights = torch.where(time_mask, paddings, attn_weights) # weird query mask in tf impl
         # https://discuss.pytorch.org/t/how-to-set-nan-in-tensor-to-0/3918/4
         # attn_weights[attn_weights != attn_weights] = 0 # rm nan for -inf into softmax case
         attn_weights = self.dropout(attn_weights)
 
         outputs = attn_weights.matmul(V_)
         outputs += attn_weights.matmul(abs_pos_V_)
-        outputs += attn_weights.unsqueeze(-2).matmul(time_matrix_V_).reshape(outputs.shape)
+        outputs += attn_weights.unsqueeze(2).matmul(time_matrix_V_).reshape(outputs.shape).squeeze(2)
 
         # (num_head * N, T, C / num_head) -> (N, T, C)
         outputs = torch.cat(torch.split(outputs, Q.shape[0], dim=0), dim=2) # div batch_size

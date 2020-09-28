@@ -23,7 +23,7 @@ parser.add_argument('--hidden_units', default=50, type=int)
 parser.add_argument('--num_blocks', default=2, type=int)
 parser.add_argument('--num_epochs', default=201, type=int)
 parser.add_argument('--num_heads', default=1, type=int)
-parser.add_argument('--dropout_rate', default=0.5, type=float)
+parser.add_argument('--dropout_rate', default=0.2, type=float)
 parser.add_argument('--l2_emb', default=0.0, type=float)
 parser.add_argument('--device', default='cpu', type=str)
 parser.add_argument('--inference_only', default=False, type=str2bool)
@@ -91,9 +91,14 @@ for epoch in range(epoch_start_idx, args.num_epochs + 1):
         indices = np.where(pos != 0)
         loss = bce_criterion(pos_logits[indices], pos_labels[indices])
         loss += bce_criterion(neg_logits[indices], neg_labels[indices])
+        for param in model.item_emb.parameters(): loss += args.l2_emb * torch.norm(param)
+        for param in model.abs_pos_K_emb.parameters(): loss += args.l2_emb * torch.norm(param)
+        for param in model.abs_pos_V_emb.parameters(): loss += args.l2_emb * torch.norm(param)
+        for param in model.time_matrix_K_emb.parameters(): loss += args.l2_emb * torch.norm(param)
+        for param in model.time_matrix_V_emb.parameters(): loss += args.l2_emb * torch.norm(param)
         loss.backward()
         adam_optimizer.step()
-        # print("loss in epoch {} iteration {}: {}".format(epoch, step, loss.item())) # expected 0.4~0.6 after init few epochs
+        print("loss in epoch {} iteration {}: {}".format(epoch, step, loss.item())) # expected 0.4~0.6 after init few epochs
 
     if epoch % 20 == 0:
         model.eval()
