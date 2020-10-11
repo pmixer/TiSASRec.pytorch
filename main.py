@@ -98,7 +98,7 @@ for epoch in range(epoch_start_idx, args.num_epochs + 1):
         for param in model.time_matrix_V_emb.parameters(): loss += args.l2_emb * torch.norm(param)
         loss.backward()
         adam_optimizer.step()
-        print("loss in epoch {} iteration {}: {}".format(epoch, step, loss.item())) # expected 0.4~0.6 after init few epochs
+        # print("loss in epoch {} iteration {}: {}".format(epoch, step, loss.item())) # expected 0.4~0.6 after init few epochs
 
     if epoch % 20 == 0:
         model.eval()
