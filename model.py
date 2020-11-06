@@ -101,7 +101,7 @@ class TiSASRec(torch.nn.Module): # similar to torch.nn.MultiheadAttention
 
         self.abs_pos_K_emb = torch.nn.Embedding(args.maxlen, args.hidden_units)
         self.abs_pos_V_emb = torch.nn.Embedding(args.maxlen, args.hidden_units)
-        self.time_matrix_K_emb = torch.nn.Embedding(self.item_num+1, args.hidden_units)
+        self.time_matrix_K_emb = torch.nn.Embedding(args.time_span+1, args.hidden_units)
         self.time_matrix_V_emb = torch.nn.Embedding(args.time_span+1, args.hidden_units)
 
         self.item_emb_dropout = torch.nn.Dropout(p=args.dropout_rate)
