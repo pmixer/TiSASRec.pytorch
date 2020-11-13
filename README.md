@@ -1,3 +1,6 @@
+update: as expected, with few lines of xavier initialization code added, it converges as fast as original tf version now, pls check github issue of this repo and  https://github.com/pmixer/SASRec.pytorch for more details if interested :)
+
+---
 
 update: a pretrained model added, pls run the command as below to test its performance:
 
