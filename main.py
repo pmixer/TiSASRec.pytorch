@@ -55,6 +55,13 @@ except:
 
 sampler = WarpSampler(user_train, usernum, itemnum, relation_matrix, batch_size=args.batch_size, maxlen=args.maxlen, n_workers=3)
 model = TiSASRec(usernum, itemnum, itemnum, args).to(args.device)
+
+for name, param in model.named_parameters():
+    try:
+        torch.nn.init.xavier_uniform_(param.data)
+    except:
+        pass # just ignore those failed init layers
+
 model.train() # enable model training
 
 epoch_start_idx = 1
@@ -80,7 +87,7 @@ t0 = time.time()
 
 for epoch in range(epoch_start_idx, args.num_epochs + 1):
     if args.inference_only: break # just to decrease identition
-    for step in tqdm(range(num_batch), total=num_batch, ncols=70, leave=False, unit='b'):
+    for step in range(num_batch): # tqdm(range(num_batch), total=num_batch, ncols=70, leave=False, unit='b'):
         u, seq, time_seq, time_matrix, pos, neg = sampler.next_batch() # tuples to ndarray
         u, seq, pos, neg = np.array(u), np.array(seq), np.array(pos), np.array(neg)
         time_seq, time_matrix = np.array(time_seq), np.array(time_matrix)
@@ -98,7 +105,7 @@ for epoch in range(epoch_start_idx, args.num_epochs + 1):
         for param in model.time_matrix_V_emb.parameters(): loss += args.l2_emb * torch.norm(param)
         loss.backward()
         adam_optimizer.step()
-        # print("loss in epoch {} iteration {}: {}".format(epoch, step, loss.item())) # expected 0.4~0.6 after init few epochs
+        print("loss in epoch {} iteration {}: {}".format(epoch, step, loss.item())) # expected 0.4~0.6 after init few epochs
 
     if epoch % 20 == 0:
         model.eval()
