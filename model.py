@@ -63,7 +63,10 @@ class TimeAwareMultiHeadAttention(torch.nn.Module):
         # key masking, -2^32 lead to leaking, inf lead to nan
         # 0 * inf = nan, then reduce_sum([nan,...]) = nan
 
-        time_mask = time_mask.unsqueeze(-1).expand(attn_weights.shape[0], -1, attn_weights.shape[-1])
+        # fixed a bug pointed out in https://github.com/pmixer/TiSASRec.pytorch/issues/2
+        # time_mask = time_mask.unsqueeze(-1).expand(attn_weights.shape[0], -1, attn_weights.shape[-1])
+        time_mask = time_mask.unsqueeze(-1).repeat(self.head_num, 1, 1)
+        time_mask = time_mask.expand(-1, -1, attn_weights.shape[-1])
         attn_mask = attn_mask.unsqueeze(0).expand(attn_weights.shape[0], -1, -1)
         paddings = torch.ones(attn_weights.shape) *  (-2**32+1) # -1e23 # float('-inf')
         paddings = paddings.to(self.dev)
