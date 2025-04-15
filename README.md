@@ -1,3 +1,20 @@
+Update: in https://arxiv.org/html/2504.09596v1, I listed the ideas worth to try but not yet due to my limited bandwidth in sparse time.
+
+Pls feel free to do these experiments to have fun, and pls consider citing the article if it somehow helps in your recsys exploration:
+
+```
+@article{huang2025revisiting,
+  title={Revisiting Self-Attentive Sequential Recommendation},
+  author={Huang, Zan},
+  journal={arXiv preprint arXiv:2504.09596},
+  year={2025}
+}
+```
+
+For questions or collaborations, pls create a new issue in this repo or drop me an email using the email address as shared.
+
+---
+
 update: as expected, with few lines of xavier initialization code added, it converges as fast as original tf version now, pls check github issue of this repo and  https://github.com/pmixer/SASRec.pytorch for more details if interested :)
 
 ---
